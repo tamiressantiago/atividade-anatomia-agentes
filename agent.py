@@ -179,6 +179,9 @@ def run_coding_agent_loop():
         while True:
             assistant_response = execute_llm_call(conversation)
             tool_invocations = extract_tool_invocations(assistant_response)
+
+            print("Thought...\n", assistant_response,"\n")
+
             if not tool_invocations:
                 print(f"{ASSISTANT_COLOR}Assistant:{RESET_COLOR}: {assistant_response}")
                 conversation.append({
@@ -189,7 +192,9 @@ def run_coding_agent_loop():
             for name, args in tool_invocations:
                 tool = TOOL_REGISTRY[name]
                 resp = ""
-                print(name, args)
+
+                print("Action...\n", "Tool: ", name, "\nArgs: ", args, "\n")
+
                 if name == "read_file":
                     resp = tool(args.get("filename", "."))
                 elif name == "list_files":
@@ -198,6 +203,9 @@ def run_coding_agent_loop():
                     resp = tool(args.get("path", "."),
                                 args.get("old_str", ""),
                                 args.get("new_str", ""))
+
+                print("Observation...\n ", json.dumps(resp), "\n")
+
                 conversation.append({
                     "role": "user",
                     "content": f"tool_result({json.dumps(resp)})"
